@@ -14,23 +14,26 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 // Add orbit controls
 const controls = new OrbitControls(camera, renderer.domElement);
-
-// Add a simple cube to the scene
-const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
-
+const spherProperties={
+    radius:1,
+    widthSegments:32,
+    heightSegments:32,
+    color:[0x00ff00,0x0000ff,0xff0000,0x00ffff]
+}
+const spheres=new THREE.Group();
+for(let i=0;i<=4;i++){
+    const geometry = new THREE.SphereGeometry(spherProperties.radius,spherProperties.widthSegments,spherProperties.heightSegments);
+    const material = new THREE.MeshBasicMaterial({ color: spherProperties.color[i]});
+    const sphere = new THREE.Mesh(geometry, material);
+    spheres.add(sphere);
+}
+scene.add(spheres)
 // Position camera
 camera.position.z = 5;
 
 // Animation loop
 function animate() {
     requestAnimationFrame(animate);
-
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.01;
-
     controls.update();
     renderer.render(scene, camera);
 }
