@@ -1,13 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bellefair&display=swap" rel="stylesheet">
 </head>
+
 <body>
-      <canvas></canvas>
-      <script type="module" src="script.js"></script>
+  <div class="main w-full h-screen overflow-hidden text-white font-['Helvetica Now Display']">
+    <div class="w-full h-screen  top-0 right-0 absolute z-[2]">
+      <nav class="flex justify-between items-center px-6 py-4">
+        <div class="title ">
+          <h1 class="text-2xl font-bold">Solar System</h1>
+        </div>
+        <div class="item flex gap-4 text-lg px-3">
+          <a href="#">Home</a>
+          <a href="#">About</a>
+          <a href="#">Contact</a>
+        </div>
+      </nav>
+      <div class="name flex flex-col justify-center items-center w-1/3 mx-auto   ">
+        <div class="h-24 overflow-hidden text-center ">
+          <h1 class="heading text-8xl font-light   tracking-tighter font-['Bellefair']">Earth</h1>
+          <h1 class="heading text-8xl font-light  tracking-tighter font-['Bellefair']">Mercury</h1>
+          <h1 class="heading text-8xl font-light  tracking-tighter font-['Bellefair']">Venus</h1>
+          <h1 class="heading text-8xl font-light   tracking-tighter font-['Bellefair']">Marsh</h1>
+        </div>
+
+        <p class="text-md font-['Gilroy'] whitespace-nowrap">Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+        <div class="fading-line w-full h-px mt-4 relative overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-fade-line">
+          </div>
+        </div>
+      </div>
+    </div>
+    <canvas class="w-full h-screen absolute top-0 left-0"></canvas>
+  </div>
+  <script type="module" src="script.js"></script>
 </body>
+
 </html>
