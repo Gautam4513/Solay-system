@@ -4,6 +4,7 @@ import gsap from 'gsap';
 import { RGBELoader } from 'three/examples/jsm/Addons.js';
 import GUI from 'lil-gui';
 
+let isChecked=false;
 
 // const loader = new THREE.TextureLoader();
 
@@ -16,7 +17,8 @@ const renderer = new THREE.WebGLRenderer({
 });
 
 camera.position.z = 5;
-// const controls = new OrbitControls(camera, renderer.domElement);
+
+
 
 const loader = new RGBELoader();
 loader.load("./hdri/hdri.hdr", function (hdri) {
@@ -61,6 +63,7 @@ function createEarthClouds() {
     earthCloudMat.alphaMap = earthCloudtaxt;
     earthCloudMat.transparent = true;
 }
+earthCloudeGroup.rotation.z=1;
 
 function createMoon(){
     const moonGeo=new THREE.SphereGeometry(0.3,250,250);
@@ -105,7 +108,7 @@ function createMars(){
     const marsTxt=new THREE.TextureLoader().load("./mars/marsh.jpg");
     marsTxt.colorSpace=THREE.SRGBColorSpace;
     marsMat.map=marsTxt;
-    
+    mars.rotation.z=1;
     return mars;
 }
 const mars=createMars();
@@ -119,7 +122,7 @@ function createMercury(){
     const mercuryTxt=new THREE.TextureLoader().load("./mercury/2k_mercury.jpg");
     mercuryTxt.colorSpace=THREE.SRGBColorSpace;
     mercuryMat.map=mercuryTxt;
-    
+    mercury.rotation.z=1;
     return mercury;
 }
 const mercury=createMercury();
@@ -158,7 +161,7 @@ const venusGroup=new THREE.Group();
 venusGroup.add(venus);
 venusGroup.add(venusAtmosphere);
 // scene.add(venusGroup);
-
+venusGroup.rotation.z=1;
 //create main group
 const mainGroup=new THREE.Group();
 mainGroup.add(earthMaster);
@@ -249,7 +252,10 @@ const handleScroll = throttle(function(e) {
 
 // Add event listener for scroll
 window.addEventListener('wheel', (e)=>{
-    handleScroll(e);
+    if(!isChecked){
+        handleScroll(e);
+    }
+    
 });
 
 
@@ -282,17 +288,66 @@ function venusAtmosphereRotation(){
     venusAtmosphere.rotation.y=clock.getElapsedTime()*0.13;
 }
 
+//for the movement of camera
+const checkbox=document.querySelector("#checkbox");
+const main=document.querySelector("#main");
+const toggle=document.querySelector(".toggle");
+checkbox.addEventListener("change",()=>{
+    if(checkbox.checked){
+        isChecked=true;
+        console.log("its checked")
+        toggle.classList.remove("bg-gray-500");
+        toggle.classList.add("bg-amber-500");
+        toggle.children[0].classList.add("translate-x-6");
+        gsap.to(main,{
+            zIndex:`-=3`,
+            opacity:0,
+            duration:0.5,
+            ease:"power1.inOut"
+        })
+    }
+    else{
+        isChecked=false;
+        toggle.classList.remove("bg-amber-500");
+        toggle.classList.add("bg-gray-500");
+        toggle.children[0].classList.remove("translate-x-6");
+        toggle.children[0].classList.add("translate-x-0");
+        gsap.to(main,{
+            zIndex:`+=3`,
+            opacity:1,
+            duration:0.5,
+            ease:"power1.inOut"
+        })
+        gsap.to(camera.position,{
+            x:`0`,
+            y:`0`,
+            z:`5`,
+            duration:2,
+            ease:'power1.inOut'
+        })
+        gsap.to(camera.rotation,{
+            x:`0`,
+            y:`0`,
+            z:`0`,
+            duration:2,
+            ease:'power1.inOut'
+        })
+        console.log("its not checked")
+    }
+})
+
+const controls = new OrbitControls(camera, renderer.domElement);
 const clock = new THREE.Clock();
 // Animation loop
 function animate() {
     requestAnimationFrame(animate);
-    // controls.update();
+    controls.update();
     //rotate earth
     rotateEarth();
     //moon rotation
     rotateMoon();
     //rotate moon in orbit
-    moonGroup.rotation.y+=0.0005;
+    moonGroup.rotation.y+=0.0001;
 
     //marsh rotation
     marshRotation();
@@ -306,7 +361,7 @@ function animate() {
     //venus atmosphear rotaion
     venusAtmosphereRotation();
 
-
+ 
     renderer.render(scene, camera);
 }
 

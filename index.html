@@ -4,16 +4,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>Solar System</title>
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bellefair&display=swap" rel="stylesheet">
 </head>
 
-<body>
+<body >
   <div class="main w-full h-screen overflow-hidden text-white font-['Helvetica Now Display']">
-    <div class="w-full h-screen  top-0 right-0 absolute z-[2]">
+    <div id="main" class="w-full h-screen  top-0 right-0 absolute z-[2]">
       <nav class="flex justify-between items-center px-6 py-4">
         <div class="title ">
           <h1 class="text-2xl font-bold">Solar System</h1>
@@ -38,6 +38,15 @@
           </div>
         </div>
       </div>
+    </div>
+    <div class="absolute bottom-3 right-10 z-[3]">
+      <input type="checkbox" id="checkbox" class="hidden">
+      <label for="checkbox" class="cursor-pointer flex items-center">
+        <div class="toggle relative w-12 h-6 bg-gray-500 rounded-full p-1 transition-colors duration-300 ease-in-out">
+          <div class="w-4 absolute  h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ease-in-out"></div>
+        </div>
+        <span class="font-bold ml-2 text-xl text-amber-500">Move Freely</span>
+      </label>
     </div>
     <canvas class="w-full h-screen absolute top-0 left-0"></canvas>
   </div>
