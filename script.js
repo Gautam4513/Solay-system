@@ -181,7 +181,7 @@ mainGroup.children.forEach((item,index)=>{
 })
 
 //main functnality
-const headings=document.querySelectorAll(".heading");
+const headings = document.querySelectorAll(".heading");
 // Throttle function
 function throttle(func, limit) {
     let inThrottle;
@@ -196,67 +196,90 @@ function throttle(func, limit) {
     }
 }
 
+let scrollCount = 0;
+let touchStartX = 0;
+let touchEndX = 0;
 
-let scrollCount=0;
 // Throttled scroll event handler
-const handleScroll = throttle(function(e) {
-    const scrollDirection = e.deltaY > 0 ? 'down' : 'up';
-    if(scrollDirection=='down'){
-        scrollCount=((scrollCount+1)%4);
-        gsap.to(mainGroup.rotation,{
-            y:`-=${Math.PI/2}`,
-            duration:1,
-            ease:'power1.inOut'
+const handleScroll = throttle(function(direction) {
+    if(direction === 'down' || direction === 'left'){
+        scrollCount = ((scrollCount + 1) % 4);
+        gsap.to(mainGroup.rotation, {
+            y: `-=${Math.PI/2}`,
+            duration: 1,
+            ease: 'power1.inOut'
         })
-        gsap.to(headings,{
-            y:`-=${100}%`,
-            duration:1,
-            ease:'power1.inOut'
+        gsap.to(headings, {
+            y: `-=${100}%`,
+            duration: 1,
+            ease: 'power1.inOut'
         })
-        if(scrollCount==0){
-            gsap.to(headings,{
-                y:`0`,
-                duration:1,
-                ease:'power1.inOut'
+        if(scrollCount == 0){
+            gsap.to(headings, {
+                y: `0`,
+                duration: 1,
+                ease: 'power1.inOut'
             })
         }
     }
-    else{
-        if(scrollCount==0){
-            scrollCount=4;
+    else if(direction === 'up' || direction === 'right'){
+        if(scrollCount == 0){
+            scrollCount = 4;
         }
         else{
             scrollCount--;
         }
 
-        gsap.to(mainGroup.rotation,{
-            y:`+=${Math.PI/2}`,
-            duration:1,
-            ease:'power1.inOut'
+        gsap.to(mainGroup.rotation, {
+            y: `+=${Math.PI/2}`,
+            duration: 1,
+            ease: 'power1.inOut'
         })
-        gsap.to(headings,{
-            y:`+=${100}%`,
-            duration:1,
-            ease:'power1.inOut'
+        gsap.to(headings, {
+            y: `+=${100}%`,
+            duration: 1,
+            ease: 'power1.inOut'
         })
-        if(scrollCount==4){
+        if(scrollCount == 4){
             scrollCount--;
-            gsap.to(headings,{
-                y:`-=${300}%`,
-                duration:1,
-                ease:'power1.inOut'
+            gsap.to(headings, {
+                y: `-=${300}%`,
+                duration: 1,
+                ease: 'power1.inOut'
             })
         }
     }
 }, 1000);
 
 // Add event listener for scroll
-window.addEventListener('wheel', (e)=>{
+window.addEventListener('wheel', (e) => {
     if(!isChecked){
-        handleScroll(e);
+        const scrollDirection = e.deltaY > 0 ? 'down' : 'up';
+        handleScroll(scrollDirection);
     }
-    
 });
+
+// Add event listeners for touch events
+window.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+});
+
+window.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+});
+
+function handleSwipe() {
+    if(!isChecked){
+        const swipeThreshold = 50; // minimum distance for swipe
+        const swipeDistance = touchEndX - touchStartX;
+        if (swipeDistance > swipeThreshold) {
+            handleScroll('right');
+        } else if (swipeDistance < -swipeThreshold) {
+            handleScroll('left');
+        }
+    }
+}
 
 
 
@@ -264,7 +287,7 @@ window.addEventListener('wheel', (e)=>{
 //function for rotate earth nad cloud
 function rotateEarth() {
     earthCloudeGroup.children.forEach((item, index) => {
-        item.rotation.y = clock.getElapsedTime() * 0.05 * (index + 1);
+        item.rotation.y = clock.getElapsedTime() * 0.005 * (index + 1);
     })
 }
 
@@ -296,9 +319,13 @@ checkbox.addEventListener("change",()=>{
     if(checkbox.checked){
         isChecked=true;
         console.log("its checked")
-        toggle.classList.remove("bg-gray-500");
-        toggle.classList.add("bg-amber-500");
-        toggle.children[0].classList.add("translate-x-6");
+        toggle.style.backgroundColor="#f59e0b"
+        gsap.to(toggle.children[0],{
+            x:`${1.5}rem`,
+            duration:0.5,
+            // ease:"none"
+        })
+        // toggle.children[0].classList.add("translate-x-6");
         gsap.to(main,{
             zIndex:`-=3`,
             opacity:0,
@@ -308,10 +335,12 @@ checkbox.addEventListener("change",()=>{
     }
     else{
         isChecked=false;
-        toggle.classList.remove("bg-amber-500");
-        toggle.classList.add("bg-gray-500");
-        toggle.children[0].classList.remove("translate-x-6");
-        toggle.children[0].classList.add("translate-x-0");
+        toggle.style.backgroundColor="#6b7280"
+        gsap.to(toggle.children[0],{
+            x:`${0}rem`,
+            duration:0.5,
+            // ease:"none"
+        })
         gsap.to(main,{
             zIndex:`+=3`,
             opacity:1,
@@ -323,14 +352,14 @@ checkbox.addEventListener("change",()=>{
             y:`0`,
             z:`5`,
             duration:2,
-            ease:'power1.inOut'
+            ease:'none'
         })
         gsap.to(camera.rotation,{
             x:`0`,
             y:`0`,
             z:`0`,
             duration:2,
-            ease:'power1.inOut'
+            ease:'none'
         })
         console.log("its not checked")
     }
