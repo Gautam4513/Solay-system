@@ -71,10 +71,13 @@ function createMoon(){
     moonTxt.colorSpace=THREE.SRGBColorSpace;
     moonMat.map=moonTxt;
     moon.position.x=2;
+    // moon.position.y=2;
     return moon;
 }
 const moon=createMoon();
 const moonGroup=new THREE.Group();
+moonGroup.rotation.y=(Math.PI/2)+1;
+moonGroup.rotation.x=Math.PI/10;
 moonGroup.add(moon);
 
 //function for rotating moon
@@ -99,7 +102,9 @@ function createMars(){
     const marhGeo=new THREE.SphereGeometry(1,250,250);
     const marsMat = new THREE.MeshPhysicalMaterial();
     const mars=new THREE.Mesh(marhGeo,marsMat);
-    marsMat.map=new THREE.TextureLoader().load("./mars/marsh.jpg");
+    const marsTxt=new THREE.TextureLoader().load("./mars/marsh.jpg");
+    marsTxt.colorSpace=THREE.SRGBColorSpace;
+    marsMat.map=marsTxt;
     
     return mars;
 }
@@ -111,7 +116,9 @@ function createMercury(){
     const mercuryGeo=new THREE.SphereGeometry(1,250,250);
     const mercuryMat = new THREE.MeshPhysicalMaterial();
     const mercury=new THREE.Mesh(mercuryGeo,mercuryMat);
-    mercuryMat.map=new THREE.TextureLoader().load("./mercury/2k_mercury.jpg");
+    const mercuryTxt=new THREE.TextureLoader().load("./mercury/2k_mercury.jpg");
+    mercuryTxt.colorSpace=THREE.SRGBColorSpace;
+    mercuryMat.map=mercuryTxt;
     
     return mercury;
 }
@@ -124,7 +131,9 @@ function createVenus(){
     const venusGeo = new THREE.SphereGeometry(1,250,250);
     const venusMat= new THREE.MeshPhysicalMaterial();
     const venus = new THREE.Mesh(venusGeo,venusMat);
-    venusMat.map = new THREE.TextureLoader().load("./venus/color.jpg");
+    const venusTxt=new THREE.TextureLoader().load("./venus/color.jpg");
+    venusTxt.colorSpace=THREE.SRGBColorSpace;
+    venusMat.map=venusTxt;
     return venus;
 }
 const venus=createVenus();
@@ -135,7 +144,9 @@ function createVenusAtmosphere(){
     const venusAtmosphereGeo=new THREE.SphereGeometry(1.01,250,250);
     const venusAtmosphereMat= new THREE.MeshPhysicalMaterial();
     const venusAtmosphere = new THREE.Mesh(venusAtmosphereGeo,venusAtmosphereMat);
-    venusAtmosphereMat.alphaMap=new THREE.TextureLoader().load("./venus/2k_venus_atmosphere.jpg");
+    const venusAtmosphereTxt=new THREE.TextureLoader().load("./venus/2k_venus_atmosphere.jpg");
+    venusAtmosphereTxt.colorSpace=THREE.SRGBColorSpace;
+    venusAtmosphereMat.alphaMap=venusAtmosphereTxt;
     venusAtmosphereMat.transparent=true;
     return venusAtmosphere;
 }
@@ -167,6 +178,7 @@ mainGroup.children.forEach((item,index)=>{
 })
 
 //main functnality
+const headings=document.querySelectorAll(".heading");
 // Throttle function
 function throttle(func, limit) {
     let inThrottle;
@@ -182,23 +194,56 @@ function throttle(func, limit) {
 }
 
 
-
+let scrollCount=0;
 // Throttled scroll event handler
 const handleScroll = throttle(function(e) {
     const scrollDirection = e.deltaY > 0 ? 'down' : 'up';
     if(scrollDirection=='down'){
+        scrollCount=((scrollCount+1)%4);
         gsap.to(mainGroup.rotation,{
             y:`-=${Math.PI/2}`,
             duration:1,
             ease:'power1.inOut'
         })
+        gsap.to(headings,{
+            y:`-=${100}%`,
+            duration:1,
+            ease:'power1.inOut'
+        })
+        if(scrollCount==0){
+            gsap.to(headings,{
+                y:`0`,
+                duration:1,
+                ease:'power1.inOut'
+            })
+        }
     }
     else{
+        if(scrollCount==0){
+            scrollCount=4;
+        }
+        else{
+            scrollCount--;
+        }
+
         gsap.to(mainGroup.rotation,{
             y:`+=${Math.PI/2}`,
             duration:1,
             ease:'power1.inOut'
         })
+        gsap.to(headings,{
+            y:`+=${100}%`,
+            duration:1,
+            ease:'power1.inOut'
+        })
+        if(scrollCount==4){
+            scrollCount--;
+            gsap.to(headings,{
+                y:`-=${300}%`,
+                duration:1,
+                ease:'power1.inOut'
+            })
+        }
     }
 }, 1000);
 
@@ -229,12 +274,12 @@ function mercuryRotation(){
 
 //venus rotation
 function venusRotation(){
-    venus.rotation.y=clock.getElapsedTime()*0.01;
+    venus.rotation.y=clock.getElapsedTime()*0.1;
 }
 
 //venus atmosphear rotaion
 function venusAtmosphereRotation(){
-    venusAtmosphere.rotation.y=clock.getElapsedTime()*0.05;
+    venusAtmosphere.rotation.y=clock.getElapsedTime()*0.13;
 }
 
 const clock = new THREE.Clock();
@@ -247,7 +292,7 @@ function animate() {
     //moon rotation
     rotateMoon();
     //rotate moon in orbit
-    moonGroup.rotation.y=clock.getElapsedTime()*0.01;
+    moonGroup.rotation.y+=0.0005;
 
     //marsh rotation
     marshRotation();
