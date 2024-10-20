@@ -13,160 +13,102 @@ const renderer = new THREE.WebGLRenderer({
     antialias: true
 });
 
+camera.position.z = 5;
+const controls = new OrbitControls(camera, renderer.domElement);
+
 const loader = new RGBELoader();
-loader.load("public/hdri/moonlit_golf_4k.hdr", function (hdri) {
+loader.load("./hdri/moonlit_golf_4k.hdr", function (hdri) {
     hdri.mapping = THREE.EquirectangularReflectionMapping;
     scene.environment = hdri;
+    
 });
 
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-// Create a big sphere with stars texture
-const starTexture = new THREE.TextureLoader().load('public/stars-1728647241324-6905.jpg');
+
+const starTexture = new THREE.TextureLoader().load('./star.jpg');
 starTexture.colorSpace = THREE.SRGBColorSpace;
 
 scene.background = starTexture;
 scene.backgroundIntensity = 0.5;
 
 
+const earthCloudeGroup = new THREE.Group();
 
 
-const spherProperties = {
-    radius: 1.2,
-    widthSegments: 64,
-    heightSegments: 32,
-    color: [0x00ff00, 0x0000ff, 0xff0000, 0x00ffff],
-    planetColor: ["public/mars/mars_1k_color.jpg", "public/ertha/color.jpg", "public/mercury/mercurymap.jpg", "public/venus/venusmap.jpg"]
+function createEarth() {
+    const earthGeo = new THREE.SphereGeometry(2, 250, 250);
+    const earthMat = new THREE.MeshPhysicalMaterial();
+    const earth = new THREE.Mesh(earthGeo, earthMat);
+    // scene.add(earth);
+    earthCloudeGroup.add(earth);
+    let earthtaxt = new THREE.TextureLoader().load('./earth/earthColor.jpg');
+    earthtaxt.colorSpace = THREE.SRGBColorSpace;
+    earthMat.map = earthtaxt;
 }
-const sphereMesh = [];
-const oprbitRadius = 4.3;
-const spheres = new THREE.Group();
-for (let i = 0; i < 4; i++) {
-    const texture = new THREE.TextureLoader().load(spherProperties.planetColor[i]);
-    texture.colorSpace = THREE.SRGBColorSpace;
-    const geometry = new THREE.SphereGeometry(spherProperties.radius, spherProperties.widthSegments, spherProperties.heightSegments);
-    const material = new THREE.MeshPhysicalMaterial({ map: texture });
-    const sphere = new THREE.Mesh(geometry, material);
-    sphereMesh.push(sphere);
-    const angle = (i / 4) * (Math.PI * 2);
-    sphere.position.x = oprbitRadius * Math.cos(angle);
-    sphere.position.z = oprbitRadius * Math.sin(angle);
-    spheres.add(sphere);
+createEarth();
+function createEarthClouds() {
+    const earthCloudGeo = new THREE.SphereGeometry(2.01, 250, 250);
+    const earthCloudMat = new THREE.MeshPhysicalMaterial();
+    const earthCloud = new THREE.Mesh(earthCloudGeo, earthCloudMat);
+    // scene.add(earthCloud);
+    earthCloudeGroup.add(earthCloud);
+    let earthCloudtaxt = new THREE.TextureLoader().load('./earth/earthCloud.jpg');
+    earthCloudMat.alphaMap = earthCloudtaxt;
+    earthCloudMat.transparent = true;
 }
-scene.add(spheres)
-// Position camera
-spheres.rotation.x = 0.13;
-spheres.position.y = -0.5;
-camera.position.z = 9;
 
-// Throttle function
-function throttle(func, limit) {
-    let inThrottle;
-    return function () {
-        const args = arguments;
-        const context = this;
-        if (!inThrottle) {
-            func.apply(context, args);
-            inThrottle = true;
-            setTimeout(() => inThrottle = false, limit);
-        }
-    }
+function createMoon(){
+    const moonGeo=new THREE.SphereGeometry(0.5,250,250);
+    const moonMat=new THREE.MeshPhysicalMaterial();
+    const moon=new THREE.Mesh(moonGeo,moonMat);
+    // scene.add(moon);
+    const moonTxt=new THREE.TextureLoader().load("./moon/2k_moon.jpg");
+    moonTxt.colorSpace=THREE.SRGBColorSpace;
+    moonMat.map=moonTxt;
+    moon.position.x=5;
+    return moon;
 }
-let scrollCount = 0;
-let touchStartX = 0;
-let touchStartY = 0;
+const moon=createMoon();
+const moonGroup=new THREE.Group();
+moonGroup.add(moon);
 
-// Throttled scroll/swipe event handler
-const handleScrollOrSwipe = throttle((direction) => {
-    console.log(direction);
-    
+//function for rotating moon
+function rotateMoon(){
+    moon.rotation.y=clock.getElapsedTime()*0.1;
+}
 
-    const headings = document.querySelectorAll(".heading");
-    let move;
-    if (direction === "down" || direction === "left") {
-        scrollCount = (scrollCount + 1) % 4;
-        move = "-="
-    } else {
-        if (scrollCount === 0) {
-            scrollCount = 4;
-        } else {
-            scrollCount--;
-        }
-        move = "+="
-    }console.log(scrollCount);
-    gsap.to(headings, {
-        y: `${move}${100}%`,
-        duration: 1,
-        ease: "power2.inOut"
-    });
 
-    gsap.to(spheres.rotation, {
-        y: `${move}${Math.PI / 2}`,
-        duration: 1,
-        ease: "power2.inOut"
-    });
+createEarthClouds();
 
-    if (scrollCount === 0) {
-        gsap.to(headings, {
-            duration: 1,
-            y: `0`,
-            ease: "power2.inOut"
-        });
-    }
-    if (scrollCount === 4) {
-        scrollCount=3;
-        gsap.to(headings, {
-            duration: 1,
-            y: `-300%`,
-            ease: "power2.inOut"
-        });
-    }
-}, 1000);
+//create earth clude moon group
+const earthMaster=new THREE.Group();
+earthMaster.add(earthCloudeGroup);
+earthMaster.add(moonGroup);
 
-// Wheel event handler
-const handleWheel = (event) => {
-    const delta = event.deltaY;
-    handleScrollOrSwipe(delta > 0 ? 'down' : 'up');
-};
+scene.add(earthMaster);
 
-// Touch event handlers
-const handleTouchStart = (event) => {
-    touchStartX = event.touches[0].clientX;
-    touchStartY = event.touches[0].clientY;
-};
+//function for rotate earth nad cloud
+function rotateEarth() {
+    earthCloudeGroup.children.forEach((item, index) => {
+        item.rotation.y = clock.getElapsedTime() * 0.05 * (index + 1);
+    })
+}
 
-const handleTouchEnd = (event) => {
-    const touchEndX = event.changedTouches[0].clientX;
-    const touchEndY = event.changedTouches[0].clientY;
-    const deltaX = touchStartX - touchEndX;
-    const deltaY = touchStartY - touchEndY;
-
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        // Horizontal swipe
-        if (Math.abs(deltaX) > 50) { // Minimum swipe distance
-            handleScrollOrSwipe(deltaX > 0 ? 'left' : 'right');
-        }
-    } else {
-        // Vertical swipe
-        if (Math.abs(deltaY) > 50) { // Minimum swipe distance
-            handleScrollOrSwipe(deltaY > 0 ? 'up' : 'down');
-        }
-    }
-};
-
-// Add event listeners
-window.addEventListener('wheel', handleWheel);
-window.addEventListener('touchstart', handleTouchStart);
-window.addEventListener('touchend', handleTouchEnd);
 
 const clock = new THREE.Clock();
 // Animation loop
 function animate() {
     requestAnimationFrame(animate);
-    sphereMesh.forEach((sphere, index) => {
-        // console.log(index);
-        sphere.rotation.y = clock.getElapsedTime() * 0.05;
-    })
+    controls.update();
+    //rotate earth
+    rotateEarth();
+    //moon rotation
+    rotateMoon();
+    //rotate moon in orbit
+    moonGroup.rotation.y=clock.getElapsedTime()*0.01;
+
+
     renderer.render(scene, camera);
 }
 
